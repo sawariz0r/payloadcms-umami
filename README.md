@@ -15,6 +15,10 @@ You can install straight from the repository:
 pnpm add <git url to this repo>
 ```
 
+The package runs `pnpm build` during installation via the `prepare` script so
+that compiled JavaScript and type definitions are available when installed
+directly from Git.
+
 Then enable the plugin in `payload.config.ts`:
 
 ```ts
