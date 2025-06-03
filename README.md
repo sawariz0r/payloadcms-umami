@@ -2,6 +2,39 @@
 
 A template repo to create a [Payload CMS](https://payloadcms.com) plugin.
 
+## Umami Integration
+
+This plugin provides a minimal connection to a self–hosted [Umami](https://umami.is/) instance.
+Add your Umami credentials and URL when installing the plugin so that it can authenticate on `onInit` and expose a basic endpoint.
+
+### Installation
+
+You can install straight from the repository:
+
+```bash
+pnpm add <git url to this repo>
+```
+
+Then enable the plugin in `payload.config.ts`:
+
+```ts
+import { payloadcmsUmami } from 'payloadcms-umami'
+
+export default buildConfig({
+  plugins: [
+    payloadcmsUmami({
+      umamiUrl: 'https://analytics.example.com',
+      username: 'admin',
+      password: 'password',
+      websiteId: 'your-website-id',
+    }),
+  ],
+})
+```
+
+After start up a `/umami-websites` endpoint will proxy the list of websites from your Umami server.
+If you configured `websiteId`, the plugin exposes `/umami-pageviews` which returns the total page views for the last 24 hours and displays them on your dashboard.
+
 Payload is built with a robust infrastructure intended to support Plugins with ease. This provides a simple, modular, and reusable way for developers to extend the core capabilities of Payload.
 
 To build your own Payload plugin, all you need is:
