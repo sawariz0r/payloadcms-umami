@@ -1,6 +1,14 @@
 import type { CollectionSlug, Config } from 'payload'
 
 import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
+import { umamiPageviewsHandler } from './endpoints/umamiPageviews.js'
+import { umamiWebsitesHandler } from './endpoints/umamiWebsites.js'
+import { UmamiClient } from './utils/umamiClient.js'
+
+let umamiClient: null | UmamiClient = null
+let umamiWebsiteId: string | null = null
+export const getUmamiClient = () => umamiClient
+export const getUmamiWebsiteId = () => umamiWebsiteId
 
 export type PayloadcmsUmamiConfig = {
   /**
@@ -8,6 +16,16 @@ export type PayloadcmsUmamiConfig = {
    */
   collections?: Partial<Record<CollectionSlug, true>>
   disabled?: boolean
+  /** Password for Umami login */
+  password: string
+  /**
+   * Base URL of your Umami instance, e.g. https://analytics.example.com
+   */
+  umamiUrl: string
+  /** Username for Umami login */
+  username: string
+  /** Website ID to display metrics for */
+  websiteId?: string
 }
 
 export const payloadcmsUmami =
@@ -69,11 +87,18 @@ export const payloadcmsUmami =
       config.admin.components.beforeDashboard = []
     }
 
+    if (!config.admin.components.afterDashboard) {
+      config.admin.components.afterDashboard = []
+    }
+
     config.admin.components.beforeDashboard.push(
       `payloadcms-umami/client#BeforeDashboardClient`,
     )
     config.admin.components.beforeDashboard.push(
       `payloadcms-umami/rsc#BeforeDashboardServer`,
+    )
+    config.admin.components.afterDashboard.push(
+      `payloadcms-umami/client#AfterDashboardClient`,
     )
 
     config.endpoints.push({
@@ -82,12 +107,38 @@ export const payloadcmsUmami =
       path: '/my-plugin-endpoint',
     })
 
+    config.endpoints.push({
+      handler: umamiWebsitesHandler,
+      method: 'get',
+      path: '/umami-websites',
+    })
+
+    config.endpoints.push({
+      handler: umamiPageviewsHandler,
+      method: 'get',
+      path: '/umami-pageviews',
+    })
+
     const incomingOnInit = config.onInit
 
     config.onInit = async (payload) => {
       // Ensure we are executing any existing onInit functions before running our own.
       if (incomingOnInit) {
         await incomingOnInit(payload)
+      }
+
+      // Initialize Umami client
+      umamiClient = new UmamiClient(
+        pluginOptions.umamiUrl,
+        pluginOptions.username,
+        pluginOptions.password,
+      )
+      umamiWebsiteId = pluginOptions.websiteId || null
+
+      try {
+        await umamiClient.login()
+      } catch (err) {
+        payload.logger.error(`Failed to authenticate with Umami: ${String(err)}`)
       }
 
       const { totalDocs } = await payload.count({
