@@ -65,7 +65,7 @@
     "eslint-config-next": "15.3.0",
     "graphql": "^16.8.1",
     "mongodb-memory-server": "^10.1.2",
-    "next": "15.3.0",
+    "next": "15.3.8",
     "open": "^10.1.0",
     "payload": "3.37.0",
     "prettier": "^3.4.2",
@@ -112,5 +112,6 @@
       "sharp"
     ]
   },
-  "registry": "https://registry.npmjs.org/"
+  "registry": "https://registry.npmjs.org/",
+  "packageManager": "pnpm@10.11.1+sha512.e519b9f7639869dc8d5c3c5dfef73b3f091094b0a006d7317353c72b124e80e1afd429732e28705ad6bfa1ee879c1fce46c128ccebd3192101f43dd67c667912"
 }
